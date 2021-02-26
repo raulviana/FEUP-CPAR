@@ -108,12 +108,8 @@ void OnMultLine(int m_ar, int m_br)
 		{	temp = 0;
 			for( j=0; j<m_br; j++)
 			{	
-				temp += pha[i*m_ar+k] * phb[k*m_br+j];
-				phc[i*m_ar+j]+=temp;
-				temp = 0;
+				phc[i*m_ar+j]+= pha[i*m_ar+k] * phb[k*m_br+j];
 			}
-
-			
 		}
 	}
 
@@ -133,7 +129,6 @@ void OnMultLine(int m_ar, int m_br)
     free(phb);
     free(phc);
 	
-    
 }
 
 
