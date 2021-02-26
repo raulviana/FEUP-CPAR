@@ -5,13 +5,16 @@
 #include <time.h>
 #include <cstdlib>
 #include <papi.h>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
 #define SYSTEMTIME clock_t
+#define FILENAME "exer1.csv"
 
  
-void OnMult(int m_ar, int m_br) 
+double OnMult(int m_ar, int m_br) 
 {
 	
 	SYSTEMTIME Time1, Time2;
@@ -69,11 +72,11 @@ void OnMult(int m_ar, int m_br)
     free(phb);
     free(phc);
 	
-	
+	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
 }
 
 
-void OnMultLine(int m_ar, int m_br)
+double OnMultLine(int m_ar, int m_br)
 {
     	SYSTEMTIME Time1, Time2;
 	
@@ -116,6 +119,7 @@ void OnMultLine(int m_ar, int m_br)
 
     Time2 = clock();
 	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
+
 	cout << st;
 
 	cout << "Result matrix: " << endl;
@@ -128,7 +132,7 @@ void OnMultLine(int m_ar, int m_br)
     free(pha);
     free(phb);
     free(phc);
-	
+	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
 }
 
 
@@ -170,11 +174,13 @@ int main (int argc, char *argv[])
 	char c;
 	int lin, col, nt=1;
 	int op;
+	int startSize, endSize, step;
 	
 	int EventSet = PAPI_NULL;
   	long long values[2];
   	int ret;
-	
+	double time;
+	ofstream fileStream;
 
 	ret = PAPI_library_init( PAPI_VER_CURRENT );
 	if ( ret != PAPI_VER_CURRENT )
@@ -201,35 +207,45 @@ int main (int argc, char *argv[])
 		cin >>op;
 		if (op == 0)
 			break;
-		printf("Dimensions: lins cols ? ");
-   		cin >> lin >> col;
+		printf("Parameters: [StartSize] [Step] [EndSize]");
+		cin >> startSize >> step >> endSize;
+		// printf("Dimensions: lins cols ? ");
+   		// cin >> lin >> col;
 
+		fileStream.open(FILENAME, fstream::app);
+		do{
+			// Start counting
+			ret = PAPI_start(EventSet);
+			if (ret != PAPI_OK) cout << "ERRO: Start PAPI" << endl;
+			lin = startSize;
+			col = startSize;
+			switch (op){
+				case 1: 
+					time = OnMult(lin, col);
+					break;
+				case 2:
+					time = OnMultLine(lin, col);
+		
+					break;
+			}
 
+			ret = PAPI_stop(EventSet, values);
+			if (ret != PAPI_OK) cout << "ERRO: Stop PAPI" << endl;
+			printf("L1 DCM: %lld \n",values[0]);
+			printf("L2 DCM: %lld \n",values[1]);
 
-		// Start counting
-		ret = PAPI_start(EventSet);
-		if (ret != PAPI_OK) cout << "ERRO: Start PAPI" << endl;
+			fileStream << startSize << ", " << time << ", " << values[0] << ", " << values[1] << "\n";
+			ret = PAPI_reset( EventSet );
+			if ( ret != PAPI_OK )
+				std::cout << "FAIL reset" << endl; 
+			
+			printf("\nCurrent size: %d\n", startSize);
+			printf("*****************************\n\n");
 
-		switch (op){
-			case 1: 
-				OnMult(lin, col);
-				break;
-			case 2:
-				OnMultLine(lin, col);
-    
-				break;
-		}
+			startSize += step;
 
-  		ret = PAPI_stop(EventSet, values);
-  		if (ret != PAPI_OK) cout << "ERRO: Stop PAPI" << endl;
-  		printf("L1 DCM: %lld \n",values[0]);
-  		printf("L2 DCM: %lld \n",values[1]);
-
-		ret = PAPI_reset( EventSet );
-		if ( ret != PAPI_OK )
-			std::cout << "FAIL reset" << endl; 
-
-
+		}while(startSize <= endSize);
+		fileStream.close();
 
 	}while (op != 0);
 
