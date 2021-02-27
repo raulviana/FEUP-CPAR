@@ -11,7 +11,7 @@
 using namespace std;
 
 #define SYSTEMTIME clock_t
-#define FILENAME "exer1.csv"
+#define FILENAME "exer2_2.csv"
 
  
 double OnMult(int m_ar, int m_br) 
@@ -135,6 +135,10 @@ double OnMultLine(int m_ar, int m_br)
 	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
 }
 
+double blockMult(int lin, int col){
+	return 2.0;
+}
+
 
 float produtoInterno(float *v1, float *v2, int col)
 {
@@ -203,11 +207,12 @@ int main (int argc, char *argv[])
 	do {
 		cout << endl << "1. Multiplication" << endl;
 		cout << "2. Line Multiplication" << endl;
+		cout << "3. Block Multiplication" << endl;
 		cout << "Selection?: ";
 		cin >>op;
 		if (op == 0)
 			break;
-		printf("Parameters: [StartSize] [Step] [EndSize]");
+		printf("Parameters: [StartSize] [Step] [EndSize]\n ");
 		cin >> startSize >> step >> endSize;
 		// printf("Dimensions: lins cols ? ");
    		// cin >> lin >> col;
@@ -225,8 +230,9 @@ int main (int argc, char *argv[])
 					break;
 				case 2:
 					time = OnMultLine(lin, col);
-		
 					break;
+				case 3:
+					time = blockMult(lin, col);
 			}
 
 			ret = PAPI_stop(EventSet, values);
