@@ -108,14 +108,13 @@ double OnMultLine(int m_ar, int m_br)
 
 	for(i=0; i<m_ar; i++)
 	{	for( k=0; k<m_ar; k++)
-		{	temp = 0;
+		{	
 			for( j=0; j<m_br; j++)
 			{	
 				phc[i*m_ar+j]+= pha[i*m_ar+k] * phb[k*m_br+j];
 			}
 		}
 	}
-
 
     Time2 = clock();
 	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
@@ -135,8 +134,67 @@ double OnMultLine(int m_ar, int m_br)
 	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
 }
 
-double blockMult(int lin, int col){
-	return 2.0;
+double blockMult(int m_ar, int m_br){
+	int blockSize;
+	cout << "\n****Block Multiplication****" << endl;
+	cout << "Block size?: [0 <= Block Size <= " << m_ar << " ]" << endl;
+	cin >> blockSize;
+	if(blockSize <= 0 || blockSize > m_ar) return -1;
+
+	SYSTEMTIME Time1, Time2;
+	
+	char st[100];
+	double temp;
+	int i, j, k;
+
+	double *pha, *phb, *phc, *blA, *blB;
+	
+    pha = (double *)malloc((m_ar * m_ar) * sizeof(double));
+	blA = (double *)malloc((blockSize * blockSize) * sizeof(double));
+	blB = (double *)malloc((blockSize * blockSize) * sizeof(double));
+	phb = (double *)malloc((m_ar * m_ar) * sizeof(double));
+	phc = (double *)malloc((m_ar * m_ar) * sizeof(double));
+
+	for(i=0; i<m_ar; i++)
+		for(j=0; j<m_ar; j++)
+			pha[i*m_ar + j] = (double)1.0;
+
+	for(i=0; i<m_br; i++)
+		for(j=0; j<m_br; j++)
+			phb[i*m_br + j] = (double)(i+1);
+
+    Time1 = clock();
+
+	for(int kk=0;kk<m_ar;kk+= blockSize){
+			for(int jj=0;jj<m_ar;jj+= blockSize){
+					for(int i=0;i<m_ar;i++){
+							for(int k = kk; k<(kk+blockSize); k++){
+									temp = 0;
+								for(int j = jj; j<(jj+blockSize); j++) {
+											phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];							
+									}
+							}
+					}
+			}
+	}
+	
+
+    Time2 = clock();
+	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
+
+	cout << st;
+
+	cout << "Result matrix: " << endl;
+	for(i=0; i<1; i++)
+	{	for(j=0; j<min(10,m_br); j++)
+			cout << phc[j] << " ";
+	}
+	cout << endl;
+
+    free(pha);
+    free(phb);
+    free(phc);
+	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;	
 }
 
 
@@ -208,11 +266,14 @@ int main (int argc, char *argv[])
 		cout << endl << "1. Multiplication" << endl;
 		cout << "2. Line Multiplication" << endl;
 		cout << "3. Block Multiplication" << endl;
-		cout << "Selection?: ";
+		cout << "Selection?: [0 to stop] ";
 		cin >>op;
-		if (op == 0)
+		if (op == 0){
+			cout << "Exiting" << endl;
 			break;
-		printf("Parameters: [StartSize] [Step] [EndSize]\n ");
+		}
+	
+		printf("Parameters?: [StartSize] [Step] [EndSize]\n ");
 		cin >> startSize >> step >> endSize;
 		// printf("Dimensions: lins cols ? ");
    		// cin >> lin >> col;
