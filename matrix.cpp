@@ -137,21 +137,18 @@ double OnMultLine(int m_ar, int m_br)
 double blockMult(int m_ar, int m_br){
 	int blockSize;
 	cout << "\n****Block Multiplication****" << endl;
-	cout << "Block size?: [0 <= Block Size <= " << m_ar << " ]" << endl;
+	cout << "Block size?: [0 < Block Size <= " << m_ar << " ]" << endl;
 	cin >> blockSize;
 	if(blockSize <= 0 || blockSize > m_ar) return -1;
 
 	SYSTEMTIME Time1, Time2;
 	
 	char st[100];
-	double temp;
 	int i, j, k;
 
-	double *pha, *phb, *phc, *blA, *blB;
-	
+	double *pha, *phb, *phc;
+
     pha = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	blA = (double *)malloc((blockSize * blockSize) * sizeof(double));
-	blB = (double *)malloc((blockSize * blockSize) * sizeof(double));
 	phb = (double *)malloc((m_ar * m_ar) * sizeof(double));
 	phc = (double *)malloc((m_ar * m_ar) * sizeof(double));
 
@@ -169,15 +166,13 @@ double blockMult(int m_ar, int m_br){
 			for(int jj=0;jj<m_ar;jj+= blockSize){
 					for(int i=0;i<m_ar;i++){
 							for(int k = kk; k<(kk+blockSize); k++){
-									temp = 0;
 								for(int j = jj; j<(jj+blockSize); j++) {
-											phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];							
+											phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];						
 									}
 							}
 					}
 			}
 	}
-	
 
     Time2 = clock();
 	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
