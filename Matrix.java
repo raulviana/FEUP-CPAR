@@ -47,23 +47,16 @@ public class Matrix {
 	}
 	return (double)(Time2 - Time1);
 }
-/*
+
 public static double OnMultLine(int m_ar, int m_br)
 {
-    	SYSTEMTIME Time1, Time2;
+	long Time1, Time2;
 	
-	char st[100];
 	double temp;
 	int i, j, k;
-
-	double *pha, *phb, *phc;
+	double[] pha = new double[m_ar*m_ar*Double.BYTES], phb = new double[m_ar*m_ar*Double.BYTES], phc = new double[m_ar*m_ar*Double.BYTES];
 	
-
-		
-    pha = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	phb = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	phc = (double *)malloc((m_ar * m_ar) * sizeof(double));
-
+	
 	for(i=0; i<m_ar; i++)
 		for(j=0; j<m_ar; j++)
 			pha[i*m_ar + j] = (double)1.0;
@@ -76,7 +69,7 @@ public static double OnMultLine(int m_ar, int m_br)
 
 
 
-    Time1 = clock();
+	Time1 = System.currentTimeMillis();
 
 	for(i=0; i<m_ar; i++)
 	{	for( k=0; k<m_ar; k++)
@@ -88,44 +81,31 @@ public static double OnMultLine(int m_ar, int m_br)
 		}
 	}
 
-    Time2 = clock();
-	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
-
-	cout << st;
-
-	cout << "Result matrix: " << endl;
-	for(i=0; i<1; i++)
-	{	for(j=0; j<min(10,m_br); j++)
-			cout << phc[j] << " ";
+    Time2 = System.currentTimeMillis();
+	System.out.println("Time: " + (double)(Time2 - Time1)/1000 + "seconds\n");
+	System.out.println("Result matrix: ");
+	for (i = 0; i < 1; i++) {
+		for (j = 0; j < Math.min(10, m_br); j++)
+			System.out.print(phc[j]);
 	}
-	cout << endl;
 
-    free(pha);
-    free(phb);
-    free(phc);
-	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
+	return (double)(Time2 - Time1);
 }
 
-public static double blockMult(int m_ar, int m_br){
+public static double blockMult(int m_ar, int m_br, Scanner scanner){
 	int blockSize;
-	cout << "\n****Block Multiplication****" << endl;
-	cout << "Block size?: [0 <= Block Size <= " << m_ar << " ]" << endl;
-	cin >> blockSize;
+	System.out.println("\n****Block Multiplication****");
+	System.out.println("Block size?: [0 <= Block Size <= "  + m_ar + " ]");
+	blockSize = scanner.nextInt();
 	if(blockSize <= 0 || blockSize > m_ar) return -1;
 
-	SYSTEMTIME Time1, Time2;
+	long Time1, Time2;
 	
-	char st[100];
 	double temp;
 	int i, j, k;
 
-	double *pha, *phb, *phc, *blA, *blB;
-	
-    pha = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	blA = (double *)malloc((blockSize * blockSize) * sizeof(double));
-	blB = (double *)malloc((blockSize * blockSize) * sizeof(double));
-	phb = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	phc = (double *)malloc((m_ar * m_ar) * sizeof(double));
+	double[] pha = new double[m_ar*m_ar*Double.BYTES], phb = new double[m_ar*m_ar*Double.BYTES], phc = new double[m_ar*m_ar*Double.BYTES];
+	double[] blA = new double[(blockSize * blockSize) * Double.BYTES],blB = new double[(blockSize * blockSize)*Double.BYTES];
 
 	for(i=0; i<m_ar; i++)
 		for(j=0; j<m_ar; j++)
@@ -135,14 +115,14 @@ public static double blockMult(int m_ar, int m_br){
 		for(j=0; j<m_br; j++)
 			phb[i*m_br + j] = (double)(i+1);
 
-    Time1 = clock();
+    Time1 = System.currentTimeMillis();
 
 	for(int kk=0;kk<m_ar;kk+= blockSize){
 			for(int jj=0;jj<m_ar;jj+= blockSize){
-					for(int i=0;i<m_ar;i++){
-							for(int k = kk; k<(kk+blockSize); k++){
+					for(i=0;i<m_ar;i++){
+							for(k = kk; k<(kk+blockSize); k++){
 									temp = 0;
-								for(int j = jj; j<(jj+blockSize); j++) {
+								for(j = jj; j<(jj+blockSize); j++) {
 											phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];							
 									}
 							}
@@ -151,25 +131,17 @@ public static double blockMult(int m_ar, int m_br){
 	}
 	
 
-    Time2 = clock();
-	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
-
-	cout << st;
-
-	cout << "Result matrix: " << endl;
-	for(i=0; i<1; i++)
-	{	for(j=0; j<min(10,m_br); j++)
-			cout << phc[j] << " ";
+    Time2 = System.currentTimeMillis();
+	System.out.println("Time: " + (double)(Time2 - Time1)/1000 + "seconds\n");
+	System.out.println("Result matrix: ");
+	for (i = 0; i < 1; i++) {
+		for (j = 0; j < Math.min(10, m_br); j++)
+			System.out.print(phc[j]);
 	}
-	cout << endl;
-
-    free(pha);
-    free(phb);
-    free(phc);
-	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;	
+	return (double)(Time2 - Time1);	
 }
 
-private float produtoInterno(float *v1, float *v2, int col)
+/*private float produtoInterno(float *v1, float *v2, int col)
 {
 	int i;
 	float soma=0.0;	
@@ -214,6 +186,7 @@ private float produtoInterno(float *v1, float *v2, int col)
    		// cin >> lin >> col;
 
 		//fileStream.open(FILENAME, fstream::app);
+		System.out.println("Op" + op);
 		do{
 			// Start counting
 			//ret = PAPI_start(EventSet);
@@ -224,11 +197,11 @@ private float produtoInterno(float *v1, float *v2, int col)
 				case 1: 
 					time = OnMult(lin, col);
 					break;
-				/*case 2:
+				case 2:
 					time = OnMultLine(lin, col);
 					break;
 				case 3:
-					time = blockMult(lin, col);*/
+					time = blockMult(lin, col, myObj);
 			}
 
 			/*ret = PAPI_stop(EventSet, values);
