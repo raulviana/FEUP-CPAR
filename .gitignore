@@ -31,5 +31,8 @@
 *.out
 *.app
 
+# Java classes
+*.class
+
 #vscode folder
 .vscode
