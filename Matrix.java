@@ -9,7 +9,7 @@ public class Matrix {
 	
 	double temp;
 	int i, j, k;
-	double[] pha = new double[m_ar*m_ar*Double.BYTES], phb = new double[m_ar*m_ar*Double.BYTES], phc = new double[m_ar*m_ar*Double.BYTES];
+	double[] pha = new double[m_ar*m_ar], phb = new double[m_ar*m_ar], phc = new double[m_ar*m_ar];
 	
 	for(i=0; i<m_ar; i++)
 		for(j=0; j<m_ar; j++)
@@ -54,7 +54,7 @@ public static double OnMultLine(int m_ar, int m_br)
 	
 	double temp;
 	int i, j, k;
-	double[] pha = new double[m_ar*m_ar*Double.BYTES], phb = new double[m_ar*m_ar*Double.BYTES], phc = new double[m_ar*m_ar*Double.BYTES];
+	double[] pha = new double[m_ar*m_ar], phb = new double[m_ar*m_ar], phc = new double[m_ar*m_ar];
 	
 	
 	for(i=0; i<m_ar; i++)
@@ -104,8 +104,8 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 	double temp;
 	int i, j, k;
 
-	double[] pha = new double[m_ar*m_ar*Double.BYTES], phb = new double[m_ar*m_ar*Double.BYTES], phc = new double[m_ar*m_ar*Double.BYTES];
-	double[] blA = new double[(blockSize * blockSize) * Double.BYTES],blB = new double[(blockSize * blockSize)*Double.BYTES];
+	double[] pha = new double[m_ar*m_ar], phb = new double[m_ar*m_ar], phc = new double[m_ar*m_ar];
+	double[] blA = new double[(blockSize * blockSize) * Double.BYTES],blB = new double[(blockSize * blockSize)];
 
 	for(i=0; i<m_ar; i++)
 		for(j=0; j<m_ar; j++)
