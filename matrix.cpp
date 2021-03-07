@@ -101,6 +101,13 @@ double OnMultLine(int m_ar, int m_br)
 			for (j = 0; j < m_br; j++)
 			{
 				phc[i * m_ar + j] += pha[i * m_ar + k] * phb[k * m_br + j];
+					for(int a=0; a< m_ar; a++){
+												for (int b = 0; b< m_ar; b++){
+													cout << phc[a*m_ar+b];
+													cout << "  ";
+												}
+												cout << endl;
+											}cout << endl;cin.get();
 			}
 		}
 	}
@@ -124,15 +131,9 @@ double OnMultLine(int m_ar, int m_br)
 	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
 }
 
-double blockMult(int m_ar, int m_br)
+double blockMult(int m_ar, int m_br, int blockSize)
 {
-	int blockSize;
-	cout << "\n****Block Multiplication****" << endl;
-	cout << "Block size?: [0 < Block Size <= " << m_ar << " ]" << endl;
-	cin >> blockSize;
-	if (blockSize <= 0 || blockSize > m_ar)
-		return -1;
-
+	
 	SYSTEMTIME Time1, Time2;
 
 	char st[100];
@@ -154,24 +155,49 @@ double blockMult(int m_ar, int m_br)
 
 	Time1 = clock();
 
-	for(int kk=0;kk<m_ar;kk+= blockSize){
-			for(int jj=0;jj<m_ar;jj+= blockSize){
-					for(int i=0;i<m_ar;i++){
-							for(int k = kk; k<(kk+blockSize); k++){
-								for(int j = jj; j<(jj+blockSize); j++) {
-											phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];
-											for(int a=0; a< m_ar; a++){
+	// for(int kk=0;kk<m_ar;kk+= blockSize){
+	// 		for(int jj=0;jj<m_ar;jj+= blockSize){
+	// 				for(int i=0;i<m_ar;i++){
+	// 						for(int k = kk; k<(kk+blockSize); k++){
+	// 							for(int j = jj; j<(jj+blockSize); j++) {
+	// 										phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];
+	// 										for(int a=0; a< m_ar; a++){
+	// 											for (int b = 0; b< m_ar; b++){
+	// 												cout << phc[a*m_ar+b];
+	// 												cout << "  ";
+	// 											}
+	// 											cout << endl;
+	// 										}cout << endl;cin.get();
+	// 								}
+	// 						}
+	// 				}
+	// 		}
+	// }
+	int block_i, block_j, block_k;
+
+	for (block_i = 0; block_i < m_ar; block_i += blockSize) {
+        for (block_j = 0; block_j < m_ar; block_j += blockSize) {
+            for (block_k = 0; block_k < m_ar; block_k += blockSize) {
+                for (i = 0; i < blockSize; ++i) {
+                    for (k = 0; k < blockSize; ++k) {
+                        for (j = 0; j < blockSize; ++j) {
+							phc[(block_i + i)*m_ar + block_j + j] += 
+								pha[(block_i + i)*m_ar + block_k + k] * 
+								phb[(block_k + k)*m_ar + block_j + j];
+								for(int a=0; a< m_ar; a++){
 												for (int b = 0; b< m_ar; b++){
 													cout << phc[a*m_ar+b];
 													cout << "  ";
 												}
 												cout << endl;
-											}cout << endl;
-									}
-							}
-					}cin.get();
+											}cout << endl;cin.get();
+						}
+					}
+				}
+
 			}
-	}
+		}
+	} 
 
 
 	Time2 = clock();
@@ -271,8 +297,20 @@ int main(int argc, char *argv[])
 			break;
 		}
 
+
 		printf("Parameters?: [StartSize] [Step] [EndSize]\n ");
 		cin >> startSize >> step >> endSize;
+
+		int blockSize;
+		if (op == 3){
+			
+			cout << "\n****Block Multiplication****" << endl;
+			cout << "Block size?: [0 < Block Size <= " << startSize << " ]" << endl;
+			cin >> blockSize;
+			if (blockSize <= 0 || blockSize > startSize)
+				exit(8);
+		}
+
 		// printf("Dimensions: lins cols ? ");
 		// cin >> lin >> col;
 
@@ -294,7 +332,7 @@ int main(int argc, char *argv[])
 				time = OnMultLine(lin, col);
 				break;
 			case 3:
-				time = blockMult(lin, col);
+				time = blockMult(lin, col, blockSize);
 			}
 
 			ret = PAPI_stop(EventSet, values);

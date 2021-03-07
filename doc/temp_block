@@ -27,7 +27,7 @@ void onMultLineBlockProd(int m_ar, int m_br, int b, int t, int tn, double *pha, 
 	}
 }
 
-void onMultLineBlock(int m_ar, int m_br, int b, int t)
+void onMultLineBlock(int m_ar, int m_br, int block)
 {
 
 	double Time1, Time2;
