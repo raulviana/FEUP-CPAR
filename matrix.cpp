@@ -11,7 +11,7 @@
 using namespace std;
 
 #define SYSTEMTIME clock_t
-#define FILENAME "exer2_1.csv"
+#define FILENAME "exer3.csv"
 
 double OnMult(int m_ar, int m_br)
 {
@@ -101,13 +101,6 @@ double OnMultLine(int m_ar, int m_br)
 			for (j = 0; j < m_br; j++)
 			{
 				phc[i * m_ar + j] += pha[i * m_ar + k] * phb[k * m_br + j];
-					for(int a=0; a< m_ar; a++){
-												for (int b = 0; b< m_ar; b++){
-													cout << phc[a*m_ar+b];
-													cout << "  ";
-												}
-												cout << endl;
-											}cout << endl;cin.get();
 			}
 		}
 	}
@@ -155,50 +148,19 @@ double blockMult(int m_ar, int m_br, int blockSize)
 
 	Time1 = clock();
 
-	// for(int kk=0;kk<m_ar;kk+= blockSize){
-	// 		for(int jj=0;jj<m_ar;jj+= blockSize){
-	// 				for(int i=0;i<m_ar;i++){
-	// 						for(int k = kk; k<(kk+blockSize); k++){
-	// 							for(int j = jj; j<(jj+blockSize); j++) {
-	// 										phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];
-	// 										for(int a=0; a< m_ar; a++){
-	// 											for (int b = 0; b< m_ar; b++){
-	// 												cout << phc[a*m_ar+b];
-	// 												cout << "  ";
-	// 											}
-	// 											cout << endl;
-	// 										}cout << endl;cin.get();
-	// 								}
-	// 						}
-	// 				}
-	// 		}
-	// }
-	int block_i, block_j, block_k;
-
-	for (block_i = 0; block_i < m_ar; block_i += blockSize) {
-        for (block_j = 0; block_j < m_ar; block_j += blockSize) {
-            for (block_k = 0; block_k < m_ar; block_k += blockSize) {
-                for (i = 0; i < blockSize; ++i) {
-                    for (k = 0; k < blockSize; ++k) {
-                        for (j = 0; j < blockSize; ++j) {
-							phc[(block_i + i)*m_ar + block_j + j] += 
-								pha[(block_i + i)*m_ar + block_k + k] * 
-								phb[(block_k + k)*m_ar + block_j + j];
-								for(int a=0; a< m_ar; a++){
-												for (int b = 0; b< m_ar; b++){
-													cout << phc[a*m_ar+b];
-													cout << "  ";
-												}
-												cout << endl;
-											}cout << endl;cin.get();
+	for(int kk=0;kk<m_ar;kk+= blockSize){
+			for(int jj=0;jj<m_ar;jj+= blockSize){
+					for(int i=0;i<m_ar;i++){
+						int k = kk;
+						for(k; k<(kk+blockSize); k++){
+							int j = jj;
+								for(j; j<(jj+blockSize); j++) {
+											phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];
+								}
 						}
 					}
-				}
-
 			}
-		}
-	} 
-
+	}
 
 	Time2 = clock();
 	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
@@ -311,13 +273,10 @@ int main(int argc, char *argv[])
 				exit(8);
 		}
 
-		// printf("Dimensions: lins cols ? ");
-		// cin >> lin >> col;
-
-		fileStream.open(FILENAME);
+		fileStream.open(FILENAME, fstream::app);
 		do
 		{
-			// Start counting
+			// Start PAPI counting
 			ret = PAPI_start(EventSet);
 			if (ret != PAPI_OK)
 				cout << "ERRO: Start PAPI" << endl;

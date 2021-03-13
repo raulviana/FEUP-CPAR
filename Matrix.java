@@ -6,7 +6,6 @@ public class Matrix {
 {
 	
 	long Time1, Time2;
-	
 	double temp;
 	int i, j, k;
 	double[] pha = new double[m_ar*m_ar], phb = new double[m_ar*m_ar], phc = new double[m_ar*m_ar];
@@ -14,9 +13,6 @@ public class Matrix {
 	for(i=0; i<m_ar; i++)
 		for(j=0; j<m_ar; j++)
 			pha[i*m_ar + j] = (double)1;
-
-
-
 	for(i=0; i<m_br; i++)
 		for(j=0; j<m_br; j++)
 			phb[i*m_br + j] = (double)(i+1);
@@ -36,7 +32,6 @@ public class Matrix {
 		}
 	}
 
-
     Time2 = System.currentTimeMillis();
 	System.out.println("Time: " + (double)(Time2 - Time1)/1000 + "seconds\n");
 
@@ -51,22 +46,16 @@ public class Matrix {
 public static double OnMultLine(int m_ar, int m_br)
 {
 	long Time1, Time2;
-	
-	double temp;
 	int i, j, k;
 	double[] pha = new double[m_ar*m_ar], phb = new double[m_ar*m_ar], phc = new double[m_ar*m_ar];
-	
 	
 	for(i=0; i<m_ar; i++)
 		for(j=0; j<m_ar; j++)
 			pha[i*m_ar + j] = (double)1.0;
 
-
-
 	for(i=0; i<m_br; i++)
 		for(j=0; j<m_br; j++)
 			phb[i*m_br + j] = (double)(i+1);
-
 
 
 	Time1 = System.currentTimeMillis();
@@ -100,12 +89,9 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 	if(blockSize <= 0 || blockSize > m_ar) return -1;
 
 	long Time1, Time2;
-	
-	double temp;
 	int i, j, k;
 
 	double[] pha = new double[m_ar*m_ar], phb = new double[m_ar*m_ar], phc = new double[m_ar*m_ar];
-	double[] blA = new double[(blockSize * blockSize) * Double.BYTES],blB = new double[(blockSize * blockSize)];
 
 	for(i=0; i<m_ar; i++)
 		for(j=0; j<m_ar; j++)
@@ -121,7 +107,6 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 			for(int jj=0;jj<m_ar;jj+= blockSize){
 					for(i=0;i<m_ar;i++){
 							for(k = kk; k<(kk+blockSize); k++){
-									temp = 0;
 								for(j = jj; j<(jj+blockSize); j++) {
 											phc[i*m_ar + j] += pha[i*m_ar + k]*phb[k*m_ar +j];							
 									}
@@ -130,7 +115,6 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 			}
 	}
 	
-
     Time2 = System.currentTimeMillis();
 	System.out.println("Time: " + (double)(Time2 - Time1)/1000 + "seconds\n");
 	System.out.println("Result matrix: ");
@@ -141,28 +125,12 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 	return (double)(Time2 - Time1);	
 }
 
-/*private float produtoInterno(float *v1, float *v2, int col)
-{
-	int i;
-	float soma=0.0;	
-
-	for(i=0; i<col; i++)
-		soma += v1[i]*v2[i];
-	
-	return(soma);
-
-}*/
-
 	public static void main(String[] args) {
-        
-	char c;
-	int lin, col, nt=1;
+
+	int lin, col;
 	int op = 1;
 	int startSize, endSize, step;
-  	//long values[2];
-  	int ret;
 	double time;
-	//ofstream fileStream;
 	Scanner myObj = new Scanner(System.in);  // Create a Scanner object
 
 	do {
@@ -182,15 +150,10 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 		startSize = myObj.nextInt();
 		step = myObj.nextInt();
 		endSize = myObj.nextInt();
-		// printf("Dimensions: lins cols ? ");
-   		// cin >> lin >> col;
 
-		//fileStream.open(FILENAME, fstream::app);
+		
 		System.out.println("Op" + op);
 		do{
-			// Start counting
-			//ret = PAPI_start(EventSet);
-			//if (ret != PAPI_OK) cout << "ERRO: Start PAPI" << endl;
 			lin = startSize;
 			col = startSize;
 			switch (op){
@@ -203,16 +166,6 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 				case 3:
 					time = blockMult(lin, col, myObj);
 			}
-
-			/*ret = PAPI_stop(EventSet, values);
-			if (ret != PAPI_OK) cout << "ERRO: Stop PAPI" << endl;
-			printf("L1 DCM: %lld \n",values[0]);
-			printf("L2 DCM: %lld \n",values[1]);
-
-			fileStream << startSize << ", " << time << ", " << values[0] << ", " << values[1] << "\n";
-			ret = PAPI_reset( EventSet );
-			if ( ret != PAPI_OK )
-				std::cout << "FAIL reset" << endl; */
 			
 			System.out.println("\nCurrent size: " + startSize);
 			System.out.println("*****************************\n\n");
@@ -220,22 +173,9 @@ public static double blockMult(int m_ar, int m_br, Scanner scanner){
 			startSize += step;
 
 		}while(startSize <= endSize);
-		//fileStream.close();
 
 	}while (op != 0);
 	myObj.close();
-		/*ret = PAPI_remove_event( EventSet, PAPI_L1_DCM );
-		if ( ret != PAPI_OK )
-			std::cout << "FAIL remove event" << endl; 
-
-		ret = PAPI_remove_event( EventSet, PAPI_L2_DCM );
-		if ( ret != PAPI_OK )
-			std::cout << "FAIL remove event" << endl; 
-
-		ret = PAPI_destroy_eventset( &EventSet );
-		if ( ret != PAPI_OK )
-			std::cout << "FAIL destroy" << endl;*/
-
     }
 
 }
