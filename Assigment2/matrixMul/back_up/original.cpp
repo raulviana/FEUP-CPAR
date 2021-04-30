@@ -57,7 +57,7 @@ double blockMult(int m_ar, int m_br, int blockSize)
     }
 
     Time2 = clock();
-    sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
+    sprintf(st, "Time: %3.3f millisecinds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC * 1000);
 
     cout << st;
 
