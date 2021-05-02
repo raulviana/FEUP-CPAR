@@ -48,7 +48,7 @@ bool matrix_generator(double matrix[], int size)
         }
     }
     cout << "matrix generated with size" << size << "x" << size << endl;
-    return matrix_writer("original_matrix.txt", matrix, size);
+    return matrix_writer("original_matrix.csv", matrix, size);
 }
 
 bool lu_seq(double matrix[], int size){
