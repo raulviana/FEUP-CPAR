@@ -55,15 +55,17 @@ inline int prevPowerOfTwo(int x)
  * Note that this example only works for powers of two.
  * */
 template <typename T>
-void local_mxm(cl::sycl::queue &q, T *MA, T *MB, T *MC, T *MD, unsigned int matSize)
+void local_mxm(cl::sycl::queue &q, T *MA, T *MB, T *MC, unsigned int matSize)
 {
     std::ofstream fileStream;
     auto device = q.get_device();
     auto maxBlockSize = device.get_info<cl::sycl::info::device::max_work_group_size>();
     unsigned int blockSize = prevPowerOfTwo(std::sqrt(maxBlockSize));
+    std::cout << "using device : " << device.get_info<cl::sycl::info::device::name>();
     std::cout << " The Device Max Work Group Size is : " << maxBlockSize << std::endl;
     std::cout << " The matrix size is : " << matSize << std::endl;
     std::cout << " The maximume blockSize is : " << blockSize << std::endl;
+
     // Make sure the block size is not larger than the mat size
     blockSize = std::min(matSize, blockSize);
     auto start = std::chrono::steady_clock::now();
@@ -73,13 +75,11 @@ void local_mxm(cl::sycl::queue &q, T *MA, T *MB, T *MC, T *MD, unsigned int matS
         buffer<T> bA(MA, dimensions, props);
         buffer<T> bB(MB, dimensions, props);
         buffer<T> bC(MC, dimensions, props);
-        buffer<T> bD(MD, dimensions, props);
 
         q.submit([&](handler &cgh) {
             auto pA = bA.template get_access<access::mode::read>(cgh);
             auto pB = bB.template get_access<access::mode::read>(cgh);
             auto pC = bC.template get_access<access::mode::write>(cgh);
-            auto pD = bD.template get_access<access::mode::write>(cgh);
             auto localRange = range<1>(blockSize * blockSize);
 
             accessor<T, 1, access::mode::read_write, access::target::local> pBA(
@@ -150,7 +150,6 @@ int main(int argc, char *argv[])
     float *MA;
     float *MB;
     float *MC;
-    float *MD;
 
     bool error = false;
 
@@ -217,7 +216,6 @@ int main(int argc, char *argv[])
             MA = new float[startSize * startSize];
             MB = new float[startSize * startSize];
             MC = new float[startSize * startSize];
-            MD = new float[startSize * startSize];
 
             for (int i = 0; i < startSize; i++)
                 for (int j = 0; j < startSize; j++)
@@ -228,7 +226,7 @@ int main(int argc, char *argv[])
                     MB[i * startSize + j] = (double)(i + 1);
 
             //call the execution function
-            local_mxm(q, MA, MB, MC, MD, startSize);
+            local_mxm(q, MA, MB, MC, startSize);
             startSize += step;
 
             delete[] MA;
