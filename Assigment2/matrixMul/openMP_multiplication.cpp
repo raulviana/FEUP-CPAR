@@ -59,29 +59,42 @@ void local_mxm(T *MA, T *MB, T *MC, unsigned int matSize)
     std::ofstream fileStream;
 
     // Make sure the block size is not larger than the mat size
-    blockSize = std::min(matSize, blockSize);
-    auto start = std::chrono::steady_clock::now();
+    blockSize = 512;
 
-    for (int kk = 0; kk < m_ar; kk += blockSize)
-    {
-        for (int jj = 0; jj < m_ar; jj += blockSize)
-        {
-            for (int i = 0; i < m_ar; i++)
-            {
-                int k = kk;
-#pragma omp parallel for collapse(2)
-                for (k; k < (kk + blockSize); k++)
-                {
-                    int j = jj;
-                    for (j; j < (jj + blockSize); j++)
-                    {
-#pragma omp critical
-                        MC[i * m_ar + j] += MA[i * m_ar + k] * MB[k * m_ar + j];
-                    }
-                }
-            }
-        }
-    }
+   	int i = 0, j = 0, k = 0, jj = 0, kk = 0;
+	float tmp;
+	int chunk = 1;
+	int tid;
+#pragma omp parallel shared(MA, MB, MC, matSize, chunk) private(i, j, k, jj, kk, tid, tmp)
+	{
+		//omp_set_dynamic(0);
+		//omp_set_num_threads(4);
+		tid = omp_get_thread_num();
+		if (tid == 0)
+		{
+			cout << "Number of threads: " << omp_get_num_threads() << endl;
+		}
+		#pragma omp for schedule (static, chunk)
+		for (jj = 0; jj < size; jj += blockSize)
+		{
+			//cout << "thread " << omp_get_thread_num() << "value " << i << endl;
+			for (kk = 0; kk < size; kk += blockSize)
+			{
+				for (i = 0; i < size; i++)
+				{
+					for (k = kk; k < ((kk + blockSize) > size ? size : (kk + blockSize)); k++)
+					{
+						
+						for (j = jj; j < ((jj + blockSize) > size ? size : (jj + blockSize)); j++)
+						{
+							MC[i * matSize +j] += MA[i * matSize +k] * MB[k * matSize +j];
+						}
+						
+					}
+				}
+			}
+		}
+	}
 
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> time_seconds = end - start;
