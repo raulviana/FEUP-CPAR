@@ -43,8 +43,7 @@ bool matrix_generator(double matrix[], int size)
         for (int col = 0; col < size; col++)
         {
             
-            matrix[line*size + col] = (double)(rand() % 11);
-            cout << matrix[line*size +col];
+            matrix[line*size + col] = (double)(rand() % 100) + 1;
         }
     }
     cout << "matrix generated with size" << size << "x" << size << endl;
@@ -72,8 +71,8 @@ bool lu_seq(double matrix[], int size){
 
 bool lu_splitter(double matrix[], int size){
 
-    double l[size * size];
-    double u[size * size];
+    double* l = new double[size * size];
+    double* u = new double[size * size];
 
 
     for (int line = 0; line < size; line++)
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
 
     cin >> size;
 
-    double matrix[size * size];
+    double* matrix = new double[size * size];
     matrix_generator(matrix, size);
     
     lu_seq(matrix, size);
