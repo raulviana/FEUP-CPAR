@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <papi.h>
+#include <chrono>
 
 using namespace std;
 
@@ -110,12 +111,13 @@ double sequential(int size){
 
     double* matrix = new double[size * size];
     matrix_generator(matrix, size);
-	Time1 = clock();
-    lu_seq(matrix, size);
+	auto start = std::chrono::steady_clock::now();
+	  lu_seq(matrix, size);
     lu_splitter(matrix, size);
-	Time2 = clock();
+  
+	auto end = std::chrono::steady_clock::now();
 
-	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
+	return (double)(end - start).count();
 }
 
 void handle_error(int retval)
@@ -154,7 +156,8 @@ int main(int argc, char *argv[])
 	int startSize, endSize, step;
 	int lin, col, nt = 1;
 	long long values[2];
-
+	float flops;
+	
 	ret = PAPI_library_init(PAPI_VER_CURRENT);
 	if (ret != PAPI_VER_CURRENT)
 		std::cout << "FAIL" << endl;
@@ -217,6 +220,7 @@ int main(int argc, char *argv[])
 			{
 			case 1:
 				time = sequential(lin);
+    		flops = (2.0f * lin * lin * lin / time) * 1.0e-9f;
 				break;
 			case 2:
 				//time = OnMultLine(lin, col);
@@ -228,7 +232,7 @@ int main(int argc, char *argv[])
 			printf("L1 DCM: %lld \n", values[0]);
 			printf("L2 DCM: %lld \n", values[1]);
 
-			fileStream << startSize << ", " << time << ", " << values[0] << ", " << values[1] << "\n";
+			fileStream << startSize << ", " << time << ", " << flops << ", " << values[0] << ", " << values[1] << "\n";
 			ret = PAPI_reset(EventSet);
 			if (ret != PAPI_OK)
 				std::cout << "FAIL reset" << endl;
