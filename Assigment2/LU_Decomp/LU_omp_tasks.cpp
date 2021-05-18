@@ -16,7 +16,9 @@ using namespace std;
 #define MAX_SIZE = 8192;
 
 #define SYSTEMTIME clock_t
-#define FILENAME "exer3.csv"
+#define FILENAME "exer3_openmp_task.csv"
+
+class mxm_kernel;
 
 bool matrix_writer(string filename, double matrixToWrite[], int size)
 {
@@ -58,6 +60,15 @@ bool matrix_generator(double matrix[], int size)
 
 bool lu_seq(double matrix[], int size)
 {
+	int tid;
+	#pragma omp parallel shared(matrix, size) private(line, col, mul)
+	{
+		tid = omp_get_thread_num();
+		if (tid == 0)
+		{
+			cout << "Number of threads: " << omp_get_num_threads() << endl;
+		}
+		#pragma omp for task
 	for (int line = 0; line < size; line++)
 	{
 #pragma omp parallel for
@@ -72,6 +83,7 @@ bool lu_seq(double matrix[], int size)
 
 			matrix[size * col + line] = mul;
 		}
+	}
 	}
 }
 

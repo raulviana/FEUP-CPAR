@@ -102,7 +102,7 @@ bool lu_splitter(double matrix[], int size){
             }
         }  
     }
-    return (matrix_writer("l_matrix.csv", l, size) && matrix_writer("u_matrix.csv", u, size) && matrix_writer("result_matrix.csv", matrix, size));
+    return true;
 }
 
 
@@ -221,6 +221,7 @@ int main(int argc, char *argv[])
 			case 1:
 				time = sequential(lin);
     		flops = (2.0f * lin * lin * lin / time) * 1.0e-9f;
+				cout << "GFLOPS: " << flops;
 				break;
 			case 2:
 				//time = OnMultLine(lin, col);
