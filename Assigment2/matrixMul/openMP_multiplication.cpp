@@ -1,8 +1,3 @@
-/*  This example compares an OpenMP blocked matrix multiplication
- *  implementation with a SYCL blocked matrix multiplication example.
- *  The purpose is not to compare performance, but to show the similarities
- *  and differences between them.
- *  See block_host for the OpenMP implementation. */
 
 #include <omp.h>
 
@@ -46,13 +41,6 @@ inline int prevPowerOfTwo(int x)
     return x - (x >> 1);
 }
 
-/* Function template that performs the matrix * matrix operation. It is
- * a template because only some OpenCL devices support double-precision
- * floating-point numbers.
- * Broadly, the function chooses an appropriate work size, then enqueues
- * the matrix * matrix lambda on the queue provided.
- * Note that this example only works for powers of two.
- * */
 template <typename T>
 void local_mxm(T *MA, T *MB, T *MC, unsigned int matSize, unsigned int num_thread)
 {
