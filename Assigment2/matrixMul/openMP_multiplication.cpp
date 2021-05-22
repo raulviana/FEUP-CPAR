@@ -1,8 +1,3 @@
-/*  This example compares an OpenMP blocked matrix multiplication
- *  implementation with a SYCL blocked matrix multiplication example.
- *  The purpose is not to compare performance, but to show the similarities
- *  and differences between them.
- *  See block_host for the OpenMP implementation. */
 
 #include <omp.h>
 
@@ -46,46 +41,43 @@ inline int prevPowerOfTwo(int x)
     return x - (x >> 1);
 }
 
-/* Function template that performs the matrix * matrix operation. It is
- * a template because only some OpenCL devices support double-precision
- * floating-point numbers.
- * Broadly, the function chooses an appropriate work size, then enqueues
- * the matrix * matrix lambda on the queue provided.
- * Note that this example only works for powers of two.
- * */
 template <typename T>
-void local_mxm(T *MA, T *MB, T *MC, unsigned int matSize)
+void local_mxm(T *MA, T *MB, T *MC, unsigned int matSize, unsigned int num_thread)
 {
     std::ofstream fileStream;
 
     // Make sure the block size is not larger than the mat size
-    blockSize = 512;
+    int blockSize = 512;
 
    	int i = 0, j = 0, k = 0, jj = 0, kk = 0;
 	float tmp;
 	int chunk = 1;
 	int tid;
-#pragma omp parallel shared(MA, MB, MC, matSize, chunk) private(i, j, k, jj, kk, tid, tmp)
-	{
+  auto start = std::chrono::steady_clock::now();
+#pragma omp parallel num_threads(num_thread) shared(MA, MB, MC, matSize, chunk) private(i, j, k, jj, kk, tid, tmp)
+
+  {
 		//omp_set_dynamic(0);
 		//omp_set_num_threads(4);
 		tid = omp_get_thread_num();
 		if (tid == 0)
 		{
-			cout << "Number of threads: " << omp_get_num_threads() << endl;
+			std::cout << "Number of threads optimal: " << omp_get_num_threads() << std::endl;
+      std::cout << "Number of threads real: " << num_thread << std::endl;
 		}
+    
 		#pragma omp for schedule (static, chunk)
-		for (jj = 0; jj < size; jj += blockSize)
+		for (jj = 0; jj < matSize; jj += blockSize)
 		{
 			//cout << "thread " << omp_get_thread_num() << "value " << i << endl;
-			for (kk = 0; kk < size; kk += blockSize)
+			for (kk = 0; kk < matSize; kk += blockSize)
 			{
-				for (i = 0; i < size; i++)
+				for (i = 0; i < matSize; i++)
 				{
-					for (k = kk; k < ((kk + blockSize) > size ? size : (kk + blockSize)); k++)
+					for (k = kk; k < ((kk + blockSize) > matSize ? matSize : (kk + blockSize)); k++)
 					{
 						
-						for (j = jj; j < ((jj + blockSize) > size ? size : (jj + blockSize)); j++)
+						for (j = jj; j < ((jj + blockSize) > matSize ? matSize : (jj + blockSize)); j++)
 						{
 							MC[i * matSize +j] += MA[i * matSize +k] * MB[k * matSize +j];
 						}
@@ -119,6 +111,7 @@ int main(int argc, char *argv[])
     unsigned int startSize, endSize, step;
     int platformIndex = 1;
     int deviceIndex = 1;
+    unsigned int number_thread;
 
     std::cout << std::endl
               << "********** openMP Matrix Multiplication ****************" << std::endl
@@ -133,6 +126,9 @@ int main(int argc, char *argv[])
             std::cout << "Exiting" << std::endl;
             return 0;
         }
+
+        std::cout << "Number of threads? " << std::endl;
+        std::cin >> number_thread;
 
         printf("Parameters?: [StartSize] [Step] [EndSize]\n ");
         std::cin >> startSize >> step >> endSize;
@@ -156,7 +152,7 @@ int main(int argc, char *argv[])
                     MB[i * startSize + j] = (double)(i + 1);
 
             //call the execution function
-            local_mxm(MA, MB, MC, startSize);
+            local_mxm(MA, MB, MC, startSize, number_thread);
             startSize += step;
 
             delete[] MA;
