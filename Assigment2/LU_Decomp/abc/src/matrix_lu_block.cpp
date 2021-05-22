@@ -1,18 +1,10 @@
-//
-//  matrix_lu_block.cpp
-//  matrix_lu
-//
-//  Created by Vitaly Koynov on 02/09/20.
-//  Copyright © 2020 Sergey Kireev. All rights reserved.
-//  SPDX-License-Identifier: MIT
-//
-
 #include <iostream>
 #include "dpc_common.hpp"
 #include <fstream>
- 
+#include <chrono>
+
 using namespace std;
-//using namespace sycl;
+
 #define FILENAME "exer3.csv"
  
 // in: a[n][n] : lu-decomposition
@@ -67,18 +59,6 @@ void proc_g(const int ny, const int nx, const int n, double *al1d, double *au1d,
     for (int i = 0; i < n; i++)
       for (int k = 0; k < nx; k++) 
       	(*ag)[j][k] -= (*al)[j][i] * (*au)[i][k];
-}
-
-// in: a[ny][n],b[n][nx], inout: c[ny][nx] : c += a*b
-void proc_mm(int ny, int nx, int n, double *a1d, double *b1d, double *c1d)
-{
-  auto a = (double(*)[ny][n ]) a1d;
-  auto b = (double(*)[n ][nx]) b1d;
-  auto c = (double(*)[ny][nx]) c1d;
-  for (int j = 0; j < ny; j++)
-    for (int i = 0; i < n; i++)
-      for (int k = 0; k < nx; k++) 
-      	(*c)[j][k] += (*a)[j][i] * (*b)[i][k];
 }
 
 // out: a[ny][nx] : a = value (fill with value)
@@ -189,19 +169,6 @@ void LU_decomposition(int nb, int bs, double **a1d)
   }
 }
 
-// multiplication of square blocked matrices: c += a*b
-void matrix_multiplication(int nb, int bs, double **a1d, double **b1d, double **c1d)
-{
-  auto a = (double*(*)[nb][nb]) a1d;
-  auto b = (double*(*)[nb][nb]) b1d;
-  auto c = (double*(*)[nb][nb]) c1d;
-  
-  for (int i = 0; i < nb; i++)
-    for (int k = 0; k < nb; k++)
-      for (int j = 0; j < nb; j++) 
-      	proc_mm(bs, bs, bs, (*a)[i][k], (*b)[k][j], (*c)[i][j]);
-}
- 
 // get lower triangle of blocked square matrix: al = lower(a)
 void get_lower_matrix(int nb, int bs, double **a1d, double **al1d)
 {
@@ -260,18 +227,6 @@ double matrix_delta(int nb, int bs, double **a, double **b)
   return delta;
 }
  
-void print_matrix(int nb, int bs, double **a)
-{
-  for (int ib = 0; ib < nb; ib++)
-    for (int i = 0; i < bs; i++)
-    {
-      for (int jb = 0; jb < nb; jb++)
-        for (int j = 0; j < bs; j++)
-          cout << a[ib*nb+jb][i*bs+j] << " ";
-      cout << "\n";
-    }
-}
- 
 
 int main()
 {
@@ -317,14 +272,13 @@ do
 				//time = sequential(lin);
 				break;
 			case 2:
-          cout << "Problem size: S(" << nb * bs << "," << nb * bs << ")\n";
+          cout << "Problem size: S(" << nb << "," << nb << ")\n";
           cout << "Block size: (" << bs << "," << bs << ")\n";
           
           double **aS = allocate_blocked_matrix(nb, bs);  // Source matrix
           double **aLU= allocate_blocked_matrix(nb, bs);  // LU matrix
           double **aL = allocate_blocked_matrix(nb, bs);  // L matrix
           double **aU = allocate_blocked_matrix(nb, bs);  // U matrix
-          double **aM = allocate_blocked_matrix(nb, bs);  // Matrix after multiplication
         
           // Set initial matrix
           fill_matrix(nb, bs, aS, 1.0);
@@ -334,29 +288,21 @@ do
         
           copy_matrix(nb, bs, aS, aLU);
         
-          dpc_common::TimeInterval matrixLUBlock;
+          auto matrixLUBlock_start = std::chrono::steady_clock::now();
           LU_decomposition(nb, bs, aLU);
-          cout << "Time matrixLUBlock: " << matrixLUBlock.Elapsed() << std::endl;
+          auto matrixLUBlock_end = std::chrono::steady_clock::now();
+          auto matrixLUBlock_elapsed = matrixLUBlock_end - matrixLUBlock_start;
+          cout << "Time matrixLUBlock: " << matrixLUBlock_elapsed.count() << std::endl;
           cout <<"delta: " << matrix_delta(nb, bs, aLU, aS) << std::endl;
           
           get_lower_matrix(nb, bs, aLU, aL);
           get_upper_matrix(nb, bs, aLU, aU);
-			    fileStream << nb << ", " << time << ", " << matrixLUBlock.Elapsed() << ", " << "\n";
-				  dpc_common::TimeInterval matrixMul;
-          matrix_multiplication(nb, bs, aL, aU, aM);
-          cout << "Time matrixMul: " << matrixMul.Elapsed() << std::endl;
-        
-          //cout << "Source\n"; print_matrix(nb, bs, aS);
-          //cout << "LU\n"; print_matrix(nb, bs, aLU);
-          //cout << "L\n"; print_matrix(nb, bs, aL);
-          //cout << "U\n"; print_matrix(nb, bs, aU);
-          //cout << "L*U\n"; print_matrix(nb, bs, aM);
-        
+			    fileStream << nb << ", " << time << ", " << matrixLUBlock_elapsed.count() << ", " << "\n";
+
           free_blocked_matrix(aS);
           free_blocked_matrix(aLU);
           free_blocked_matrix(aL);
           free_blocked_matrix(aU);
-          free_blocked_matrix(aM);
         break;
             }
 
