@@ -1,6 +1,6 @@
 #include <iostream>
-#include "dpc_common.hpp"
 #include <fstream>
+#include <chrono>
  
 using namespace std;
 //using namespace sycl;
@@ -160,11 +160,10 @@ void LU_decomposition(int nb, int bs, double **a1d)
     {
     	//
       	proc_l(bs, bs, (*a)[i][i], (*a)[j][i]);
-      
       for (int k = i + 1; k < nb; k++) 
 	// 
       	proc_g(bs, bs, bs, (*a)[j][i], (*a)[i][k], (*a)[j][k]);
-    }
+      }
   }
 }
 
@@ -214,18 +213,6 @@ void copy_matrix(int nb, int bs, double **a, double **b)
   for (int i = 0; i < nb * nb; i++)
     proc_copy(bs, bs, a[i], b[i]);
 }
- 
-double matrix_delta(int nb, int bs, double **a, double **b)
-{
-  double delta = 0.0;
-  for (int i = 0; i < nb * nb; i++)
-  {
-    double d = proc_delta(bs, bs, a[i], b[i]);
-    delta = delta >= d ? delta : d;
-  }
-  return delta;
-}
-
 
 int main()
 {
@@ -288,15 +275,17 @@ do
         
           copy_matrix(nb, bs, aS, aLU);
         
-          dpc_common::TimeInterval matrixLUBlock;
+          auto start = std::chrono::steady_clock::now();
           LU_decomposition(nb, bs, aLU);
-          cout << "Time matrixLUBlock: " << matrixLUBlock.Elapsed() << std::endl;
-          cout <<"delta: " << matrix_delta(nb, bs, aLU, aS) << std::endl;
+          auto end = std::chrono::steady_clock::now();
+	        std::chrono::duration<double> time_seconds = end - start;
+	        float aflops = (2.0f * nb * nb * nb * bs * bs * bs / time_seconds.count()) * 1.0e-9f;
+				  cout << "GFLOPS: " << aflops << " aa" << endl;
+          cout << "Time matrixLUBlock: " << (double)(end - start).count() << std::endl;
+          cout <<"delta: " << aflops << std::endl;
           
           get_lower_matrix(nb, bs, aLU, aL);
           get_upper_matrix(nb, bs, aLU, aU);
-			    fileStream << nb << ", " << time << ", " << matrixLUBlock.Elapsed() << ", " << "\n";
-
           free_blocked_matrix(aS);
           free_blocked_matrix(aLU);
           free_blocked_matrix(aL);
