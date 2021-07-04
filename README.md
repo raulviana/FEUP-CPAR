@@ -10,7 +10,7 @@ Repository for the Parallel Computation course ([CPAR](https://sigarra.up.pt/feu
 
 ## Tools
 
-C++, Java, SYCL, OpenMP
+C++, Java, PAPI, SYCL, OpenMP
 
 ---
 
