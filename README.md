@@ -10,8 +10,12 @@ Repository for the Parallel Computation course ([CPAR](https://sigarra.up.pt/feu
 
 ## Tools
 
-C++, 
+C++, Java, SYCL, OpenMP
+
+---
 
 ## First Assignment
+
+
 
 ## Second Assignment
